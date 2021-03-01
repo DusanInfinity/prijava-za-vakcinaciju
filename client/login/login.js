@@ -1,6 +1,8 @@
 document.body.onload 
 {
-    const panel = document.querySelector("#panel");
+    const panel = document.createElement("div");
+    panel.id = "panel";
+    document.body.appendChild(panel);
     if(panel)
     {
         let labele = ["Username: ", "Password: "];
@@ -46,7 +48,7 @@ document.body.onload
         {
             let username = document.querySelector(".user");
             let pw = document.querySelector(".pw");
-            alert(`username: ${username.value}\npassword: ${pw.value}`);
+            alert(`Username: ${username.value}\nPassword: ${pw.value}`);
         }
     }
 }

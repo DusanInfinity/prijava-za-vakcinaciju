@@ -8,8 +8,8 @@ body {
     height: 100%;
     display: flex;
     justify-content: center;
-    align-items: center;
-    font-size: 25px;
+    align-items: flex-start;
+    font-size: 28px;
 }
 
 #panel {
@@ -18,6 +18,7 @@ body {
     background-color: #499EFB;
     display: flex;
     flex-direction: column;
+    justify-content: space-between;
     flex: 0 1 500px;
 }
 .naslov {
@@ -42,11 +43,18 @@ body {
     flex: 0 1 100px;
 } 
 
+.formaUnos {
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
 .loginButton {
     font-size: inherit;
 }
 
 .poljeUnos {
-    width: 150px;
     font-size: inherit;
+    flex: 0 1 150px;
 }
