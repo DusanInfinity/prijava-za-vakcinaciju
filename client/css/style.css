@@ -1,0 +1,52 @@
+body {
+    background-color: black;
+    color:yellow;
+}
+
+#MainPanel {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.Head {
+    display: flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content: flex-end;
+    border: 1px solid white;
+}
+
+.IzborGrada {
+    width: 25%;
+    display: flex;
+    align-items:center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.GradContainer, .ContainerAmbulanti {
+    display: flex;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
+
+.ContainerAmbulanti {
+    border: 1px solid white;
+    flex-basis: 70%;
+}
+
+.ContainerSideMenu {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid greenyellow;
+    padding: 0.5rem;
+}
+
+.Ambulanta {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid pink;
+    padding: 0.5rem;
+}
