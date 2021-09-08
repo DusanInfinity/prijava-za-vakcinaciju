@@ -4,7 +4,7 @@ export class Grad {
         this.naziv = naziv;
         this.ambulante = ambulante;
         this.container = null;
-        this.containerApoteke = null;
+        this.containerAmbulante = null;
         this.containerSideMenu = null;
     }
 
@@ -16,48 +16,29 @@ export class Grad {
         this.container.className = 'GradContainer';
         host.appendChild(this.container);
 
-        this.containerApoteke = document.createElement('div');
-        this.containerApoteke.className = 'ContainerAmbulanti';
-        this.container.appendChild(this.containerApoteke);
-        
-        this.ambulante.forEach(a => {
-            a.crtajAmbulantu(this.containerApoteke);
-        });
-
-        this.crtajSideMenu();
-    }
-
-    crtajSideMenu()
-    {
-        if(!this.container) throw new Error("Host nije validan!");
+        this.containerAmbulante = document.createElement('div');
+        this.containerAmbulante.className = 'ContainerAmbulanti';
+        this.container.appendChild(this.containerAmbulante);
 
         this.containerSideMenu = document.createElement('div');
         this.containerSideMenu.className = 'ContainerSideMenu';
-        //this.containerSideMenu.style.display = 'none'; // hide
+        this.containerSideMenu.style.display = 'none'; // hide
         this.container.appendChild(this.containerSideMenu);
-
-        this.crtajDugmice(this.containerSideMenu);
-    }
-
-
-    crtajDugmice(host) 
-    {
-        if(!host) throw new Error("Host nije validan!");
-
-        const dugmici = ['Prijavi se', 'Izmeni prijavu', 'Obrisi prijavu'];
-        dugmici.forEach(d => {
-            let el = document.createElement('button');
-            el.className = 'button';
-            el.innerHTML = d;
-            el.onclick = (ev) => {
-                this.onButtonClick(d);
-            }
-            host.appendChild(el);
+        
+        this.ambulante.forEach(a => {
+            a.crtajAmbulantu(this);
         });
     }
 
-    onButtonClick(buttonText) 
+    prikaziSideMenu()
     {
-        alert(`Klik na dugme: ${buttonText}`)
+        if(!this.containerSideMenu) return;
+
+        this.containerSideMenu.style.display = 'block';
+    }
+
+    removeSideElements()
+    {
+        this.containerSideMenu.replaceChildren();
     }
 }

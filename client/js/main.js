@@ -11,6 +11,10 @@ function crtajStranicu(gradovi, ambulante)
     head.className = 'Head';
     panel.appendChild(head);
 
+    const gradCont = document.createElement('div');
+    gradCont.className = 'GradCont';
+    panel.appendChild(gradCont);
+
     let el = document.createElement('h1');
     el.innerHTML = 'Dobrodosli na sajt za prijavu!';
     head.appendChild(el);
@@ -24,7 +28,6 @@ function crtajStranicu(gradovi, ambulante)
 
     const dropdown = document.createElement('select');
     dropdown.id = 'IzborGradaList';
-    dropdown.text = 'Izaberi';
     let option = document.createElement('option');
     option.selected = true;
     option.hidden = true;
@@ -54,8 +57,9 @@ function crtajStranicu(gradovi, ambulante)
             if(index !== -1)
             {
                 const grad = new Grad(gradovi[index], ambulante[gradovi[index]]);
-                grad.crtajGrad(panel);
-                alert(`Izabrali ste grad ${gradovi[index]}!`);
+                gradCont.replaceChildren();
+                grad.crtajGrad(gradCont);
+                //alert(`Izabrali ste grad ${gradovi[index]}!`);
                 helpText.style.display = 'block';
             }
         }

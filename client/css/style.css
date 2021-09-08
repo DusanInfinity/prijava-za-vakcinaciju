@@ -18,6 +18,11 @@ body {
     border: 1px solid white;
 }
 
+.GradCont {
+    display: flex;
+    flex-direction: column;
+}
+
 .IzborGrada {
     width: 25%;
     display: flex;
@@ -49,4 +54,29 @@ body {
     flex-direction: column;
     border: 1px solid pink;
     padding: 0.5rem;
+    align-self: flex-start; /* Sprecava povecavanje u visinu ako se povecava sidemenu kontejner */
+}
+
+.Selected {
+    background-color: gray;
+    border: 1px solid blue;
+}
+
+.KeyValue {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.VaccApp {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.horizontalniDugmici {
+    display: flex;
+    justify-content: space-around;
+    margin-top: 5%;
 }
