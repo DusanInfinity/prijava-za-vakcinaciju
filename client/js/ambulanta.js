@@ -241,6 +241,24 @@ export class Ambulanta {
                         const prezime = document.getElementsByClassName('Prezime_VaccApp')[0].value;
                         const vakcina = document.getElementById('IzborVakcineList');
 
+                        if(isNaN(jmbg) || !Number.isInteger(Number(jmbg)))
+                        {
+                            alert(`Niste uneli ispravan JMBG!`);
+                            return;
+                        }
+                        const regEx = /^[a-z,.'-]+$/i;
+                        if(ime.length < 3 || ime.length > 50 || !regEx.test(ime))
+                        {
+                            alert('Niste uneli ispravno ime!');
+                            return;
+                        }
+
+                        if(prezime.length < 3 || prezime.length > 50 || !regEx.test(prezime))
+                        {
+                            alert('Niste uneli ispravno prezime!');
+                            return;
+                        }
+
                         try
                         {
                             const vakcinaId = vakcina.options[vakcina.selectedIndex].value;
