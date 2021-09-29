@@ -71,6 +71,37 @@ export class Ambulanta {
             case 'Prijavi se':
                 {
                     this.toggleVaccApp();
+                    break;
+                }
+            case 'Izmeni prijavu':
+                {
+                    let jmbg = prompt("Unesite Vaš JMBG", "");
+                    if(jmbg === null) return;
+                    jmbg = Number(jmbg);
+                    if(!Number.isInteger(jmbg))
+                    {
+                        alert(`Niste uneli ispravan JMBG! (${jmbg})`);
+                        return;
+                    }
+
+                    // Provera SS
+                    this.toggleChangeVaccApp(jmbg);
+                    break;
+                }
+            case 'Obrisi prijavu':
+                {
+                    let jmbg = prompt("Unesite Vaš JMBG", "");
+                    if(jmbg === null) return;
+                    jmbg = Number(jmbg);
+                    if(!Number.isInteger(jmbg))
+                    {
+                        alert(`Niste uneli ispravan JMBG! (${jmbg})`);
+                        return;
+                    }
+
+                    // Provera SS
+                    alert(`Uspešno ste obrisali prijavu sa JMBG-om: ${jmbg}`);
+                    break;
                 }
         }
     }
@@ -152,7 +183,7 @@ export class Ambulanta {
         });
     }
 
-    onButtonVaccAppClick(buttonText) {
+    onButtonVaccAppClick(buttonText, data) {
         //alert(`Klik na dugme: ${buttonText}`);
 
         switch(buttonText)
@@ -160,8 +191,67 @@ export class Ambulanta {
             case 'Odustani':
                 {
                     this.toggleButtons();
+                    break;
                 }
         }
+    }
+
+    toggleChangeVaccApp(enteredJMBG)
+    {
+        if(!this.grad.containerSideMenu) throw new Error("Host nije validan!");
+
+        this.grad.removeSideElements();
+        this.grad.prikaziSideMenu();
+
+        const containerVA = document.createElement('div');
+        containerVA.className = 'ChangeVaccApp';
+        containerVA.dataset.jmbg = enteredJMBG;
+        this.grad.containerSideMenu.appendChild(containerVA);
+        this.sideElements.push(containerVA);
+
+        let el = document.createElement('h3');
+        el.innerHTML = 'Izmena vakcine za JMBG: ' + enteredJMBG;
+        containerVA.appendChild(el);
+        
+        // Izbor vakcine
+        const izborVakcineKVP = document.createElement('div');
+        izborVakcineKVP.className = 'KeyValue';
+        containerVA.appendChild(izborVakcineKVP);
+        el = document.createElement('label');
+        el.innerHTML = 'Vakcina';
+        izborVakcineKVP.appendChild(el);
+        let dropdown = document.createElement('select');
+        dropdown.id = 'IzborVakcineList';
+        let option = document.createElement('option');
+        option.selected = true;
+        option.hidden = true;
+        option.disabled = true;
+        option.text = 'Izaberi'
+        dropdown.appendChild(option);
+        this.vakcine.forEach(v => {
+            option = document.createElement('option');
+            option.value = v;
+            option.text = v;
+            dropdown.appendChild(option);
+        });
+        izborVakcineKVP.appendChild(dropdown);
+
+
+        // Dugmici
+        const dugmiciContainer = document.createElement('div');
+        dugmiciContainer.className = 'horizontalniDugmici';
+        containerVA.appendChild(dugmiciContainer);
+
+        const dugmici = ['Izmeni', 'Odustani'];
+        dugmici.forEach(d => {
+            el = document.createElement('button');
+            el.className = 'button';
+            el.innerHTML = d;
+            el.onclick = (ev) => {
+                this.onButtonVaccAppClick(d, enteredJMBG);
+            }
+            dugmiciContainer.appendChild(el);
+        });
     }
 
     static DeselectAmbulances()
