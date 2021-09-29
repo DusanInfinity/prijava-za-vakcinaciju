@@ -1,7 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System;
+using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using VaccApp.Models;
 
 namespace VaccApp.Controllers
@@ -10,88 +11,102 @@ namespace VaccApp.Controllers
     [Route("[controller]")]
     public class VaccAppController : ControllerBase
     {
+        public VaccContext Context { get; set; }
+        public VaccAppController(VaccContext context)
+        {
+            Context = context;
+        }
+
         [HttpGet]
         [Route("VratiGradove")]
-        public IEnumerable<Grad> VratiGradove()
+        public async Task<List<Grad>> VratiGradove()
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
+            return await Context.Gradovi.ToListAsync();
         }
 
         [HttpGet]
         [Route("VratiAmbulanteZaGrad/{gradID}")]
-        public IEnumerable<Ambulanta> VratiAmbulanteZaGrad(int gradID)
+        public async Task<List<Ambulanta>> VratiAmbulanteZaGrad(int gradID)
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
+            Grad grad = await Context.Gradovi.FirstOrDefaultAsync(g => g.ID == gradID);
+
+            if (grad == null)
+                return new List<Ambulanta>();
+
+            return grad.Ambulante.ToList();
+        }
+
+        [HttpGet]
+        [Route("VratiVakcineZaAmbulantu/{adresaAmbulante}")]
+        public async Task<List<Vakcina>> VratiVakcineZaAmbulantu(string adresaAmbulante)
+        {
+            Ambulanta amb = await Context.Ambulante.FirstOrDefaultAsync(a => a.Adresa == adresaAmbulante);
+
+            if (amb == null)
+                return new List<Vakcina>();
+
+            return amb.DostupneVakcine.ToList();
         }
 
         [HttpGet]
         [Route("VratiPrijavljenogGradjanina/{jmbg}")]
-        public Gradjanin VratiPrijavljenogGradjanina(long jmbg)
+        public async Task<Gradjanin> VratiPrijavljenogGradjanina(long jmbg)
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
-        }
-
-        [HttpPut]
-        [Route("PrijaviGradjanina/{adresaAmbulante}")]
-        public Gradjanin PrijaviGradjanina([FromBody] Gradjanin g, string adresaAmbulante)
-        {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
+            return await Context.Gradjani.FirstOrDefaultAsync(g => g.JMBG == jmbg);
         }
 
         [HttpPost]
-        [Route("IzmeniPrijavu/{jmbg}/{vakcina}")]
-        public Gradjanin IzmeniIzabranuVakcinu(long jmbg, string vakcina)
+        [Route("PrijaviGradjanina/{adresaAmbulante}")]
+        public async Task<IActionResult> PrijaviGradjanina([FromBody] Gradjanin g, string adresaAmbulante)
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
+            Ambulanta amb = await Context.Ambulante.FirstOrDefaultAsync(a => a.Adresa == adresaAmbulante);
+
+            if (amb == null)
+                return BadRequest(new { message = $"Ambulanta sa adresom {adresaAmbulante} ne postoji." });
+
+            if (amb.PreostalaMestaZaVakcinaciju < 1)
+                return BadRequest(new { message = $"Sva mesta za vakcinaciju su popunjena u ovoj ambulanti." });
+
+            amb.PreostalaMestaZaVakcinaciju--;
+            Context.Gradjani.Add(g);
+            await Context.SaveChangesAsync();
+            return Ok();
+        }
+
+        [HttpPut]
+        [Route("IzmeniPrijavu/{jmbg}")]
+        public async Task<IActionResult> IzmeniIzabranuVakcinu(long jmbg, [FromBody] Vakcina vakcina)
+        {
+            Gradjanin g = await Context.Gradjani.FirstOrDefaultAsync(g => g.JMBG == jmbg);
+
+            if (g == null)
+                return BadRequest(new { message = $"Prijava sa JMBG-om {jmbg} nije pronadjena." });
+
+            Vakcina v = g.IzabranaAmbulanta.DostupneVakcine.FirstOrDefault(v => v.Naziv == vakcina.Naziv);
+
+            if (v == null)
+                return BadRequest(new { message = $"Vakcina sa imenom {vakcina.Naziv} nije pronadjena." });
+
+            g.IzabranaVakcina = v;
+            await Context.SaveChangesAsync();
+            return Ok();
         }
 
         [HttpDelete]
         [Route("ObrisiPrijavu/{jmbg}")]
-        public Gradjanin ObrisiPrijavu(long jmbg)
+        public async Task<IActionResult> ObrisiPrijavu(long jmbg)
         {
-            var rng = new Random();
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
-            {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = rng.Next(-20, 55),
-                Summary = Summaries[rng.Next(Summaries.Length)]
-            })
-            .ToArray();
+            Gradjanin g = await Context.Gradjani.FirstOrDefaultAsync(g => g.JMBG == jmbg);
+
+            if (g == null)
+                return BadRequest(new { message = $"Prijava sa JMBG-om {jmbg} nije pronadjena." });
+
+            if (g.IzabranaAmbulanta != null)
+                g.IzabranaAmbulanta.PreostalaMestaZaVakcinaciju++;
+
+            Context.Gradjani.Remove(g);
+            await Context.SaveChangesAsync();
+            return Ok();
         }
     }
 }

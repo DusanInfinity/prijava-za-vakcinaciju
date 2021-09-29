@@ -1,12 +1,10 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VaccApp.Models
 {
-    [Table("Gradovi")]
-    public class Grad
+    [Table("Vakcine")]
+    public class Vakcina
     {
         [Key]
         [Column("ID")]
@@ -16,8 +14,5 @@ namespace VaccApp.Models
         [Column("Naziv")]
         [DataType("nvarchar(50)")]
         public string Naziv { get; set; }
-
-        [JsonIgnore] // TO-DO sta ovde za db?
-        public virtual List<Ambulanta> Ambulante { get; set; }
     }
 }

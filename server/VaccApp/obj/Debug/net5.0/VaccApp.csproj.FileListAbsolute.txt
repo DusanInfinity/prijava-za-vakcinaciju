@@ -57,3 +57,5 @@ C:\Users\Infinity\Desktop\WEB projekat\server\VaccApp\obj\Debug\net5.0\VaccApp.d
 C:\Users\Infinity\Desktop\WEB projekat\server\VaccApp\obj\Debug\net5.0\ref\VaccApp.dll
 C:\Users\Infinity\Desktop\WEB projekat\server\VaccApp\obj\Debug\net5.0\VaccApp.pdb
 C:\Users\Infinity\Desktop\WEB projekat\server\VaccApp\obj\Debug\net5.0\VaccApp.genruntimeconfig.cache
+C:\Users\Infinity\Desktop\WEB projekat\server\VaccApp\bin\Debug\net5.0\Humanizer.dll
+C:\Users\Infinity\Desktop\WEB projekat\server\VaccApp\bin\Debug\net5.0\Microsoft.EntityFrameworkCore.Design.dll

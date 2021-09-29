@@ -1,5 +1,6 @@
 import { Ambulanta } from "./ambulanta.js";
 import {Grad} from "./grad.js";
+import {ApiClient} from "./util/APIClient.js";
 
 function crtajStranicu(gradovi, ambulante)
 {
@@ -67,10 +68,15 @@ function crtajStranicu(gradovi, ambulante)
 }
 
 
-const gradovi = ['Beograd', 'Nis', 'Vranje'];
+
+
+/*const gradovi = ['Beograd', 'Nis', 'Vranje'];
 const ambulante = {
     "Beograd": [ new Ambulanta('Kralja Petra 1', 5), new Ambulanta('Kralja Petra 2', 3), new Ambulanta('Kralja Petra 3', 1) ],
     "Nis": [ new Ambulanta('Kralja Aleksandra 1', 5), new Ambulanta('Kralja Aleksandra 2', 3), ],
     "Vranje": [ new Ambulanta('Cara Dusana 1', 5)],
 } 
-crtajStranicu(gradovi, ambulante);
+crtajStranicu(gradovi, ambulante); */
+
+let api = new ApiClient();
+const gradovi = await api.vaccApp.vratiGradove();

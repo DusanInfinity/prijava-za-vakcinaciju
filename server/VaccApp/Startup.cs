@@ -1,9 +1,11 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
+using VaccApp.Models;
 
 namespace VaccApp
 {
@@ -32,8 +34,14 @@ namespace VaccApp
                 {
                     builder.AllowAnyHeader()
                            .AllowAnyMethod()
-                           .WithOrigins("https://localhost:5001");
+                           .WithOrigins("https://localhost:5001",
+                                        "http://127.0.0.1:8080");
                 });
+            });
+
+            services.AddDbContext<VaccContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("VaccAppCS"));
             });
         }
 
