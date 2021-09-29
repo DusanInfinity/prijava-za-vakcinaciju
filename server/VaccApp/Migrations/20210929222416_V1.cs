@@ -23,13 +23,15 @@ namespace VaccApp.Migrations
                 name: "Ambulante",
                 columns: table => new
                 {
-                    Adresa = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ID = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Adresa = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     PreostalaMesta = table.Column<int>(type: "int", nullable: false),
                     GradID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Ambulante", x => x.Adresa);
+                    table.PrimaryKey("PK_Ambulante", x => x.ID);
                     table.ForeignKey(
                         name: "FK_Ambulante_Gradovi_GradID",
                         column: x => x.GradID,
@@ -45,16 +47,16 @@ namespace VaccApp.Migrations
                     ID = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Naziv = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    AmbulantaAdresa = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    AmbulantaID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Vakcine", x => x.ID);
                     table.ForeignKey(
-                        name: "FK_Vakcine_Ambulante_AmbulantaAdresa",
-                        column: x => x.AmbulantaAdresa,
+                        name: "FK_Vakcine_Ambulante_AmbulantaID",
+                        column: x => x.AmbulantaID,
                         principalTable: "Ambulante",
-                        principalColumn: "Adresa",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                 });
 
@@ -62,21 +64,20 @@ namespace VaccApp.Migrations
                 name: "Gradjani",
                 columns: table => new
                 {
-                    JMBG = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
+                    JMBG = table.Column<long>(type: "bigint", nullable: false),
                     Ime = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Prezime = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     IzabranaVakcinaID = table.Column<int>(type: "int", nullable: true),
-                    IzabranaAmbulantaAdresa = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                    IzabranaAmbulantaID = table.Column<int>(type: "int", nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Gradjani", x => x.JMBG);
                     table.ForeignKey(
-                        name: "FK_Gradjani_Ambulante_IzabranaAmbulantaAdresa",
-                        column: x => x.IzabranaAmbulantaAdresa,
+                        name: "FK_Gradjani_Ambulante_IzabranaAmbulantaID",
+                        column: x => x.IzabranaAmbulantaID,
                         principalTable: "Ambulante",
-                        principalColumn: "Adresa",
+                        principalColumn: "ID",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Gradjani_Vakcine_IzabranaVakcinaID",
@@ -92,9 +93,9 @@ namespace VaccApp.Migrations
                 column: "GradID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Gradjani_IzabranaAmbulantaAdresa",
+                name: "IX_Gradjani_IzabranaAmbulantaID",
                 table: "Gradjani",
-                column: "IzabranaAmbulantaAdresa");
+                column: "IzabranaAmbulantaID");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Gradjani_IzabranaVakcinaID",
@@ -102,9 +103,9 @@ namespace VaccApp.Migrations
                 column: "IzabranaVakcinaID");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Vakcine_AmbulantaAdresa",
+                name: "IX_Vakcine_AmbulantaID",
                 table: "Vakcine",
-                column: "AmbulantaAdresa");
+                column: "AmbulantaID");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

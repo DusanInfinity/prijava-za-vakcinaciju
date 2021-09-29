@@ -65,10 +65,8 @@ namespace VaccApp.Migrations
             modelBuilder.Entity("VaccApp.Models.Gradjanin", b =>
                 {
                     b.Property<long>("JMBG")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("JMBG")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnName("JMBG");
 
                     b.Property<string>("Ime")
                         .HasColumnType("nvarchar(max)")

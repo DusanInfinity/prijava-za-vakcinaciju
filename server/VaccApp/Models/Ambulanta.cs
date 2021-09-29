@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -21,7 +20,6 @@ namespace VaccApp.Models
         [DataType("int")]
         public int PreostalaMestaZaVakcinaciju { get; set; }
 
-        [JsonIgnore] // TO-DO sta ovde za db?
         public virtual List<Vakcina> DostupneVakcine { get; set; }
     }
 }

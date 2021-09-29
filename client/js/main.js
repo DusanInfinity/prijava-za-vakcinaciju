@@ -1,8 +1,10 @@
-import { Ambulanta } from "./ambulanta.js";
 import {Grad} from "./grad.js";
-import {ApiClient} from "./util/APIClient.js";
+import {ApiClient} from "./util/apiClient.js";
 
-function crtajStranicu(gradovi, ambulante)
+
+const api = new ApiClient();
+
+function crtajStranicu(gradovi)
 {
     const panel = document.createElement('div');
     panel.id = 'MainPanel';
@@ -37,8 +39,8 @@ function crtajStranicu(gradovi, ambulante)
     dropdown.appendChild(option);
     gradovi.forEach(g => {
         option = document.createElement('option');
-        option.value = g;
-        option.text = g;
+        option.value = g.id;
+        option.text = g.naziv;
         dropdown.appendChild(option);
     });
     dropdown.onchange = onCitySelect;
@@ -49,19 +51,24 @@ function crtajStranicu(gradovi, ambulante)
     helpText.style.display = 'none';
     izborGrada.appendChild(helpText);
 
-    function onCitySelect()
+    async function onCitySelect()
     {
         const el = document.getElementById('IzborGradaList');
         if(el)
         {
-            const index = gradovi.indexOf(el.value);
-            if(index !== -1)
+            try
             {
-                const grad = new Grad(gradovi[index], ambulante[gradovi[index]]);
+                const ambulante = await api.vaccApp.vratiAmbulanteZaGrad(el.value);
+                console.log(ambulante);
+                const grad = new Grad(el.value, el.text, ambulante);
                 gradCont.replaceChildren();
                 grad.crtajGrad(gradCont);
                 //alert(`Izabrali ste grad ${gradovi[index]}!`);
                 helpText.style.display = 'block';
+            }
+            catch(e) { 
+                console.log(e); 
+                alert(e.message);
             }
         }
     }
@@ -78,5 +85,6 @@ const ambulante = {
 } 
 crtajStranicu(gradovi, ambulante); */
 
-let api = new ApiClient();
 const gradovi = await api.vaccApp.vratiGradove();
+console.log(gradovi);
+crtajStranicu(gradovi);

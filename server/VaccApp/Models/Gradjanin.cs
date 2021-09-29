@@ -10,13 +10,17 @@ namespace VaccApp.Models
         [Key]
         [Column("JMBG")]
         [DataType("bigint")]
+        [DatabaseGenerated(DatabaseGeneratedOption.None)]
         public long JMBG { get; set; }
+
         [Column("Ime")]
         [DataType("nvarchar(50)")]
         public string Ime { get; set; }
+
         [Column("Prezime")]
         [DataType("nvarchar(50)")]
         public string Prezime { get; set; }
+
         [JsonIgnore] // TO-DO sta ovde za db?
         public virtual Vakcina IzabranaVakcina { get; set; }
         [JsonIgnore] // TO-DO sta ovde za db?

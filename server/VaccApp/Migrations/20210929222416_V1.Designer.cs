@@ -10,8 +10,8 @@ using VaccApp.Models;
 namespace VaccApp.Migrations
 {
     [DbContext(typeof(VaccContext))]
-    [Migration("20210929165719_V2")]
-    partial class V2
+    [Migration("20210929222416_V1")]
+    partial class V1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -67,10 +67,8 @@ namespace VaccApp.Migrations
             modelBuilder.Entity("VaccApp.Models.Gradjanin", b =>
                 {
                     b.Property<long>("JMBG")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("bigint")
-                        .HasColumnName("JMBG")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasColumnName("JMBG");
 
                     b.Property<string>("Ime")
                         .HasColumnType("nvarchar(max)")

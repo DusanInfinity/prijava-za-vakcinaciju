@@ -1,8 +1,15 @@
+import {Ambulanta} from "./ambulanta.js";
+
 export class Grad {
-    constructor(naziv, ambulante = [])
+    constructor(id, naziv, ambulante = [])
     {
+        this.id = id;
         this.naziv = naziv;
-        this.ambulante = ambulante;
+        this.ambulante = [];
+        ambulante.forEach(a => {
+            this.ambulante.push(new Ambulanta(a.id, a.adresa, a.preostalaMestaZaVakcinaciju, []));
+        });
+        
         this.container = null;
         this.containerAmbulante = null;
         this.containerSideMenu = null;

@@ -26,77 +26,100 @@ namespace VaccApp.Controllers
 
         [HttpGet]
         [Route("VratiAmbulanteZaGrad/{gradID}")]
-        public async Task<List<Ambulanta>> VratiAmbulanteZaGrad(int gradID)
+        public async Task<IActionResult> VratiAmbulanteZaGrad(int gradID)
         {
-            Grad grad = await Context.Gradovi.FirstOrDefaultAsync(g => g.ID == gradID);
+            Grad grad = await Context.Gradovi.Include(g => g.Ambulante).FirstOrDefaultAsync(g => g.ID == gradID);
 
             if (grad == null)
-                return new List<Ambulanta>();
+                return BadRequest(new { message = $"Grad sa ID-em {gradID} ne postoji." });
 
-            return grad.Ambulante.ToList();
+            if (grad.Ambulante == null || grad.Ambulante.Count < 1)
+                return BadRequest(new { message = $"Trenutno ne postoji nijedna dostupna ambulanta za izabrani grad!" });
+
+            return Ok(grad.Ambulante.ToList());
         }
 
         [HttpGet]
-        [Route("VratiVakcineZaAmbulantu/{adresaAmbulante}")]
-        public async Task<List<Vakcina>> VratiVakcineZaAmbulantu(string adresaAmbulante)
+        [Route("VratiVakcineZaAmbulantu/{ambulantaID}")]
+        public async Task<IActionResult> VratiVakcineZaAmbulantu(int ambulantaID)
         {
-            Ambulanta amb = await Context.Ambulante.FirstOrDefaultAsync(a => a.Adresa == adresaAmbulante);
+            Ambulanta amb = await Context.Ambulante.Include(a => a.DostupneVakcine).FirstOrDefaultAsync(a => a.ID == ambulantaID);
 
             if (amb == null)
-                return new List<Vakcina>();
+                return BadRequest(new { message = $"Ambulanta sa ID-em {ambulantaID} ne postoji." });
 
-            return amb.DostupneVakcine.ToList();
+            if (amb.DostupneVakcine == null || amb.DostupneVakcine.Count < 1)
+                return BadRequest(new { message = $"Trenutno ne postoji nijedna dostupna vakcina u izabranoj ambulanti!" });
+
+            return Ok(amb.DostupneVakcine.ToList());
         }
 
         [HttpGet]
         [Route("VratiPrijavljenogGradjanina/{jmbg}")]
-        public async Task<Gradjanin> VratiPrijavljenogGradjanina(long jmbg)
-        {
-            return await Context.Gradjani.FirstOrDefaultAsync(g => g.JMBG == jmbg);
-        }
-
-        [HttpPost]
-        [Route("PrijaviGradjanina/{adresaAmbulante}")]
-        public async Task<IActionResult> PrijaviGradjanina([FromBody] Gradjanin g, string adresaAmbulante)
-        {
-            Ambulanta amb = await Context.Ambulante.FirstOrDefaultAsync(a => a.Adresa == adresaAmbulante);
-
-            if (amb == null)
-                return BadRequest(new { message = $"Ambulanta sa adresom {adresaAmbulante} ne postoji." });
-
-            if (amb.PreostalaMestaZaVakcinaciju < 1)
-                return BadRequest(new { message = $"Sva mesta za vakcinaciju su popunjena u ovoj ambulanti." });
-
-            amb.PreostalaMestaZaVakcinaciju--;
-            Context.Gradjani.Add(g);
-            await Context.SaveChangesAsync();
-            return Ok();
-        }
-
-        [HttpPut]
-        [Route("IzmeniPrijavu/{jmbg}")]
-        public async Task<IActionResult> IzmeniIzabranuVakcinu(long jmbg, [FromBody] Vakcina vakcina)
+        public async Task<IActionResult> VratiPrijavljenogGradjanina(long jmbg)
         {
             Gradjanin g = await Context.Gradjani.FirstOrDefaultAsync(g => g.JMBG == jmbg);
 
             if (g == null)
                 return BadRequest(new { message = $"Prijava sa JMBG-om {jmbg} nije pronadjena." });
 
-            Vakcina v = g.IzabranaAmbulanta.DostupneVakcine.FirstOrDefault(v => v.Naziv == vakcina.Naziv);
+            return Ok(g);
+        }
 
-            if (v == null)
-                return BadRequest(new { message = $"Vakcina sa imenom {vakcina.Naziv} nije pronadjena." });
+        [HttpPost]
+        [Route("PrijaviGradjanina/{ambulantaID}/{vakcinaID}")]
+        public async Task<IActionResult> PrijaviGradjanina([FromBody] Gradjanin g, int ambulantaID, int vakcinaID)
+        {
+            if (await Context.Gradjani.FirstOrDefaultAsync(n => n.JMBG == g.JMBG) != null)
+                return BadRequest(new { message = $"JMBG {g.JMBG} je već prijavljen za vakcinaciju!" });
+
+
+            Ambulanta amb = await Context.Ambulante.Include(a => a.DostupneVakcine).FirstOrDefaultAsync(a => a.ID == ambulantaID);
+
+            if (amb == null)
+                return BadRequest(new { message = $"Ambulanta sa IDem {ambulantaID} ne postoji." });
+
+            if (amb.PreostalaMestaZaVakcinaciju < 1)
+                return BadRequest(new { message = $"Sva mesta za vakcinaciju su popunjena u ovoj ambulanti." });
+
+            Vakcina v = await Context.Vakcine.FirstOrDefaultAsync(v => v.ID == vakcinaID);
+
+            if (v == null || amb.DostupneVakcine?.FirstOrDefault(v => v.ID == vakcinaID) == null)
+                return BadRequest(new { message = $"Izabrana vakcina trenutno nije dostupna." });
+
+            amb.PreostalaMestaZaVakcinaciju--;
+            g.IzabranaAmbulanta = amb;
+            g.IzabranaVakcina = v;
+            Context.Gradjani.Add(g);
+            await Context.SaveChangesAsync();
+            return Ok(g);
+        }
+
+        [HttpPut]
+        [Route("IzmeniPrijavu/{jmbg}/{vakcinaIme}")]
+        public async Task<IActionResult> IzmeniIzabranuVakcinu(long jmbg, string vakcinaIme)
+        {
+            Gradjanin g = await Context.Gradjani.Include(g => g.IzabranaAmbulanta).FirstOrDefaultAsync(g => g.JMBG == jmbg);
+
+            if (g == null)
+                return BadRequest(new { message = $"Prijava sa JMBG-om {jmbg} nije pronadjena." });
+
+            Ambulanta amb = await Context.Ambulante.Include(a => a.DostupneVakcine).FirstOrDefaultAsync(a => a.ID == g.IzabranaAmbulanta.ID);
+            Vakcina v = await Context.Vakcine.FirstOrDefaultAsync(v => v.Naziv == vakcinaIme);
+
+            if (v == null || amb.DostupneVakcine?.FirstOrDefault(v => v.Naziv == vakcinaIme) == null)
+                return BadRequest(new { message = $"Vakcina sa imenom {vakcinaIme} nije pronadjena." });
 
             g.IzabranaVakcina = v;
             await Context.SaveChangesAsync();
-            return Ok();
+            return Ok(g);
         }
 
         [HttpDelete]
         [Route("ObrisiPrijavu/{jmbg}")]
         public async Task<IActionResult> ObrisiPrijavu(long jmbg)
         {
-            Gradjanin g = await Context.Gradjani.FirstOrDefaultAsync(g => g.JMBG == jmbg);
+            Gradjanin g = await Context.Gradjani.Include(g => g.IzabranaAmbulanta).FirstOrDefaultAsync(g => g.JMBG == jmbg);
 
             if (g == null)
                 return BadRequest(new { message = $"Prijava sa JMBG-om {jmbg} nije pronadjena." });
@@ -106,7 +129,7 @@ namespace VaccApp.Controllers
 
             Context.Gradjani.Remove(g);
             await Context.SaveChangesAsync();
-            return Ok();
+            return Ok(g);
         }
     }
 }

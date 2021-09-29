@@ -1,9 +1,14 @@
+import { Gradjanin } from "./gradjanin.js";
+import { ApiClient } from "./util/apiClient.js";
+import { Vakcina } from "./vakcina.js";
+
 export class Ambulanta {
-    constructor(adresa, preostaloPrijava, vakcine = [])
+    constructor(id, adresa, preostalaMestaZaVakcinaciju, vakcine = [])
     {
+        this.id = id;
         this.adresa = adresa;
         this.vakcine = vakcine;
-        this.preostaloPrijava = preostaloPrijava;
+        this.preostalaMestaZaVakcinaciju = preostalaMestaZaVakcinaciju;
         this.container = null;
         this.grad = null;
         this.sideElements = [];
@@ -24,21 +29,39 @@ export class Ambulanta {
         this.container.appendChild(el);
 
         el = document.createElement('h3');
-        el.innerHTML = 'Preostalo prijava: ' + this.preostaloPrijava;
+        el.innerHTML = 'Preostalo prijava: ' + this.preostalaMestaZaVakcinaciju;
         this.container.appendChild(el);
 
         this.container.onclick = (e) => {
             this.onAmbulanceSelect();
         };
     }
+    async ucitajDostupneVakcine()
+    {
+        const api = new ApiClient();
+        const vakcine = await api.vaccApp.vratiVakcineZaAmbulantu(this.id);
+        console.log(vakcine);
+        this.vakcine = [];
+        vakcine.forEach(v => {
+            this.vakcine.push(new Vakcina(v.id, v.naziv));
+        });
+    }
 
-    onAmbulanceSelect() {
-        if(!this.grad) return;
+    async onAmbulanceSelect() {
+        if(!this.grad || !this.container || this.container.classList.contains('Selected')) return;
 
         //alert(`Izabrali ste ambulantu sa adresom: ${this.adresa}`);
         Ambulanta.DeselectAmbulances();
-        this.container.classList.add('Selected');
-        this.toggleButtons();
+        try
+        {
+            await this.ucitajDostupneVakcine();
+            this.container.classList.add('Selected');
+            this.toggleButtons();
+        }
+        catch(e) {
+            console.log(e);
+            alert(e.message);
+        }
     }
 
     toggleButtons() 
@@ -62,7 +85,7 @@ export class Ambulanta {
         });
     }
 
-    onButtonClick(buttonText) 
+    async onButtonClick(buttonText) 
     {
         //alert(`Klik na dugme: ${buttonText}`);
 
@@ -83,9 +106,18 @@ export class Ambulanta {
                         alert(`Niste uneli ispravan JMBG! (${jmbg})`);
                         return;
                     }
-
-                    // Provera SS
-                    this.toggleChangeVaccApp(jmbg);
+                    try
+                    {
+                        const api = new ApiClient();
+                        const gradjanin = await api.vaccApp.vratiPrijavljenogGradjanina(jmbg);
+                        console.log(gradjanin);
+                        this.toggleChangeVaccApp(jmbg);
+                    }
+                    catch(e) { 
+                        console.log(e);
+                        alert(e.message);
+                    }
+                    
                     break;
                 }
             case 'Obrisi prijavu':
@@ -99,8 +131,19 @@ export class Ambulanta {
                         return;
                     }
 
-                    // Provera SS
-                    alert(`Uspešno ste obrisali prijavu sa JMBG-om: ${jmbg}`);
+                    try
+                    {
+                        const api = new ApiClient();
+                        console.log(`${jmbg}`);
+                        await api.vaccApp.obrisiPrijavu(jmbg);
+                        alert(`Uspešno ste obrisali prijavu sa JMBG-om: ${jmbg}`);
+                        this.toggleButtons();
+                    }
+                    catch(e) {
+                        console.log(e);
+                        alert(e.message);
+                    }
+                    
                     break;
                 }
         }
@@ -138,7 +181,7 @@ export class Ambulanta {
 
             el = document.createElement('input');
             el.type = labelTypes[i];
-            el.className = labels[i] + 'VaccApp';
+            el.className = labels[i] + '_VaccApp';
             kvpElements[i].appendChild(el);
         }
         
@@ -159,8 +202,8 @@ export class Ambulanta {
         dropdown.appendChild(option);
         this.vakcine.forEach(v => {
             option = document.createElement('option');
-            option.value = v;
-            option.text = v;
+            option.value = v.id;
+            option.text = v.naziv;
             dropdown.appendChild(option);
         });
         izborVakcineKVP.appendChild(dropdown);
@@ -183,11 +226,63 @@ export class Ambulanta {
         });
     }
 
-    onButtonVaccAppClick(buttonText, data) {
+    async onButtonVaccAppClick(buttonText, data) {
         //alert(`Klik na dugme: ${buttonText}`);
 
         switch(buttonText)
         {
+            case 'Prijavi se':
+                {
+                    const vaccApp = document.getElementsByClassName('VaccApp');
+                    if(vaccApp)
+                    {
+                        const jmbg = document.getElementsByClassName('JMBG_VaccApp')[0].value;
+                        const ime = document.getElementsByClassName('Ime_VaccApp')[0].value;
+                        const prezime = document.getElementsByClassName('Prezime_VaccApp')[0].value;
+                        const vakcina = document.getElementById('IzborVakcineList');
+
+                        try
+                        {
+                            const vakcinaId = vakcina.options[vakcina.selectedIndex].value;
+                            const gradjanin = new Gradjanin(jmbg, ime, prezime);
+                            const api = new ApiClient();
+                            api.setHeader('Content-Type', 'application/json');
+                            console.log(`${this.id} - ${vakcinaId} ${JSON.stringify(gradjanin)}`);
+                            await api.vaccApp.prijaviGradjanina(this.id, vakcinaId, gradjanin);
+                            alert(`Uspešno ste se prijavili za vakcinaciju!\n\nIme: ${ime} ${prezime}\nJMBG: ${jmbg}\nIzabrana vakcina: ${vakcina.options[vakcina.selectedIndex].text}`);
+                            this.toggleButtons();
+                        }
+                        catch(e) {
+                            console.log(e);
+                            alert(e.message);
+                        }
+                    }
+                    break;
+                }
+            case 'Izmeni':
+            {
+                const changeVaccApp = document.getElementsByClassName('ChangeVaccApp');
+                if(changeVaccApp)
+                {
+                    const vakcina = document.getElementById('IzmenaVakcineList');
+
+                    try
+                    {
+                        const vakcinaIme = vakcina.options[vakcina.selectedIndex].text;
+                        const jmbg = Number(data);
+                        const api = new ApiClient();
+                        console.log(`${jmbg} - ${vakcinaIme}`);
+                        await api.vaccApp.izmeniPrijavu(jmbg, vakcinaIme);
+                        alert(`Uspešno ste se izmenili vakcinu!\n\nJMBG: ${jmbg}\nIzabrana vakcina: ${vakcinaIme}`);
+                        this.toggleButtons();
+                    }
+                    catch(e) {
+                        console.log(e);
+                        alert(e.message);
+                    }
+                }
+                break;
+            }
             case 'Odustani':
                 {
                     this.toggleButtons();
@@ -221,7 +316,7 @@ export class Ambulanta {
         el.innerHTML = 'Vakcina';
         izborVakcineKVP.appendChild(el);
         let dropdown = document.createElement('select');
-        dropdown.id = 'IzborVakcineList';
+        dropdown.id = 'IzmenaVakcineList';
         let option = document.createElement('option');
         option.selected = true;
         option.hidden = true;
@@ -230,8 +325,8 @@ export class Ambulanta {
         dropdown.appendChild(option);
         this.vakcine.forEach(v => {
             option = document.createElement('option');
-            option.value = v;
-            option.text = v;
+            option.value = v.id;
+            option.text = v.naziv;
             dropdown.appendChild(option);
         });
         izborVakcineKVP.appendChild(dropdown);

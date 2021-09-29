@@ -19,5 +19,10 @@ namespace VaccApp.Models
 
         [JsonIgnore] // TO-DO sta ovde za db?
         public virtual List<Ambulanta> Ambulante { get; set; }
+
+        public Grad()
+        {
+            Ambulante = new List<Ambulanta>();
+        }
     }
 }
