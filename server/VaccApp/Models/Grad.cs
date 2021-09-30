@@ -17,7 +17,7 @@ namespace VaccApp.Models
         [DataType("nvarchar(50)")]
         public string Naziv { get; set; }
 
-        [JsonIgnore] // TO-DO sta ovde za db?
+        [JsonIgnore]
         public virtual List<Ambulanta> Ambulante { get; set; }
 
         public Grad()

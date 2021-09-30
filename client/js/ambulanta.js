@@ -72,7 +72,7 @@ export class Ambulanta {
         this.grad.prikaziSideMenu();
 
         //this.grad.prikaziSideMenu();
-        const dugmici = ['Prijavi se', 'Izmeni prijavu', 'Obrisi prijavu'];
+        const dugmici = ['Prijavi se', 'Proveri prijavu', 'Izmeni prijavu', 'Obrisi prijavu'];
         dugmici.forEach(d => {
             let el = document.createElement('button');
             el.className = 'button';
@@ -96,6 +96,34 @@ export class Ambulanta {
                     this.toggleVaccApp();
                     break;
                 }
+            case 'Proveri prijavu':
+                {
+                    let jmbg = prompt("Unesite Vaš JMBG", "");
+                    if(jmbg === null) return;
+                    jmbg = Number(jmbg);
+                    if(!Number.isInteger(jmbg))
+                    {
+                        alert(`Niste uneli ispravan JMBG! (${jmbg})`);
+                        return;
+                    }
+                    try
+                    {
+                        const api = new ApiClient();
+                        const gradjanin = await api.vaccApp.vratiPrijavljenogGradjanina(jmbg);
+                        console.log(gradjanin);
+                        alert(`JMBG: ${gradjanin.jmbg}
+                              \nIme: ${gradjanin.ime}
+                              \nPrezime: ${gradjanin.prezime}
+                              \nIzabrana ambulanta: ${gradjanin.izabranaAmbulanta.adresa}
+                              \nIzabrana vakcina: ${gradjanin.izabranaVakcina.naziv}`);
+                    }
+                    catch(e) { 
+                        console.log(e);
+                        alert(e.message);
+                    }
+                    
+                    break;
+                }    
             case 'Izmeni prijavu':
                 {
                     let jmbg = prompt("Unesite Vaš JMBG", "");

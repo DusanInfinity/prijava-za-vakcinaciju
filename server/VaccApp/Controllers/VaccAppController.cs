@@ -58,7 +58,7 @@ namespace VaccApp.Controllers
         [Route("VratiPrijavljenogGradjanina/{jmbg}")]
         public async Task<IActionResult> VratiPrijavljenogGradjanina(long jmbg)
         {
-            Gradjanin g = await Context.Gradjani.FirstOrDefaultAsync(g => g.JMBG == jmbg);
+            Gradjanin g = await Context.Gradjani.Include(g => g.IzabranaAmbulanta).Include(g => g.IzabranaVakcina).FirstOrDefaultAsync(g => g.JMBG == jmbg);
 
             if (g == null)
                 return BadRequest(new { message = $"Prijava sa JMBG-om {jmbg} nije pronadjena." });

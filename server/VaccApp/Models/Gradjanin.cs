@@ -21,9 +21,9 @@ namespace VaccApp.Models
         [DataType("nvarchar(50)")]
         public string Prezime { get; set; }
 
-        [JsonIgnore] // TO-DO sta ovde za db?
+        [JsonIgnore]
         public virtual Vakcina IzabranaVakcina { get; set; }
-        [JsonIgnore] // TO-DO sta ovde za db?
+        [JsonIgnore]
         public virtual Ambulanta IzabranaAmbulanta { get; set; }
     }
 }
