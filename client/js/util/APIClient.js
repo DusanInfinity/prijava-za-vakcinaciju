@@ -16,7 +16,7 @@ export class ApiClient extends HttpClient {
           vratiPrijavljenogGradjanina: (jmbg) => this.get(`VaccApp/VratiPrijavljenogGradjanina/${jmbg}`),
           prijaviGradjanina: (ambulantaID, vakcinaID, gradjanin) => this.post(`VaccApp/PrijaviGradjanina/${ambulantaID}/${vakcinaID}`, gradjanin),
           izmeniPrijavu: (jmbg, imeVakcine) => this.put(`VaccApp/IzmeniPrijavu/${jmbg}/${imeVakcine}`),
-          obrisiPrijavu: (jmbg) => this.delete(`VaccApp/ObrisiPrijavu/${jmbg}`),
+          obrisiPrijavu: (jmbg, ambulantaID) => this.delete(`VaccApp/ObrisiPrijavu/${jmbg}/${ambulantaID}`),
       };
   }
 }

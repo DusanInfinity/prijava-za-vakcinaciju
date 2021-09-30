@@ -116,17 +116,18 @@ namespace VaccApp.Controllers
         }
 
         [HttpDelete]
-        [Route("ObrisiPrijavu/{jmbg}")]
-        public async Task<IActionResult> ObrisiPrijavu(long jmbg)
+        [Route("ObrisiPrijavu/{jmbg}/{ambulantaID}")]
+        public async Task<IActionResult> ObrisiPrijavu(long jmbg, int ambulantaID)
         {
             Gradjanin g = await Context.Gradjani.Include(g => g.IzabranaAmbulanta).FirstOrDefaultAsync(g => g.JMBG == jmbg);
 
             if (g == null)
                 return BadRequest(new { message = $"Prijava sa JMBG-om {jmbg} nije pronadjena." });
 
-            if (g.IzabranaAmbulanta != null)
-                g.IzabranaAmbulanta.PreostalaMestaZaVakcinaciju++;
+            if (g.IzabranaAmbulanta == null || g.IzabranaAmbulanta.ID != ambulantaID)
+                return BadRequest(new { message = $"Prijava sa JMBG-om {jmbg} nije pronadjena u ovoj ambulanti!" });
 
+            g.IzabranaAmbulanta.PreostalaMestaZaVakcinaciju++;
             Context.Gradjani.Remove(g);
             await Context.SaveChangesAsync();
             return Ok(g);

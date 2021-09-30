@@ -29,6 +29,7 @@ export class Ambulanta {
         this.container.appendChild(el);
 
         el = document.createElement('h3');
+        el.className = `PreostaloPrijava_${this.id}`;
         el.innerHTML = 'Preostalo prijava: ' + this.preostalaMestaZaVakcinaciju;
         this.container.appendChild(el);
 
@@ -36,6 +37,17 @@ export class Ambulanta {
             this.onAmbulanceSelect();
         };
     }
+    azurirajPreostalaMesta(brZaDodavanje)
+    {
+        this.preostalaMestaZaVakcinaciju += brZaDodavanje;
+        let el = document.getElementsByClassName(`PreostaloPrijava_${this.id}`);
+        if(el && el[0])
+        {
+            el = el[0];
+            el.innerHTML = 'Preostalo prijava: ' + this.preostalaMestaZaVakcinaciju;
+        }
+    }
+
     async ucitajDostupneVakcine()
     {
         const api = new ApiClient();
@@ -96,6 +108,12 @@ export class Ambulanta {
         {
             case 'Prijavi se':
                 {
+                    if(this.preostalaMestaZaVakcinaciju < 1)
+                    {
+                        alert(`Trenutno nema slobodnih mesta za vakcinaciju u ovoj ambulanti, molimo pokusajte kasnije!`);
+                        return;
+                    }
+
                     this.toggleVaccApp();
                     break;
                 }
@@ -166,9 +184,10 @@ export class Ambulanta {
                     {
                         const api = new ApiClient();
                         console.log(`${jmbg}`);
-                        await api.vaccApp.obrisiPrijavu(jmbg);
+                        await api.vaccApp.obrisiPrijavu(jmbg, this.id);
                         alert(`Uspešno ste obrisali prijavu sa JMBG-om: ${jmbg}`);
                         this.toggleButtons();
+                        this.azurirajPreostalaMesta(1);
                     }
                     catch(e) {
                         console.log(e);
@@ -300,6 +319,7 @@ export class Ambulanta {
                             await api.vaccApp.prijaviGradjanina(this.id, vakcinaId, gradjanin);
                             alert(`Uspešno ste se prijavili za vakcinaciju!\n\nIme: ${ime} ${prezime}\nJMBG: ${jmbg}\nIzabrana vakcina: ${vakcina.options[vakcina.selectedIndex].text}`);
                             this.toggleButtons();
+                            this.azurirajPreostalaMesta(-1);
                         }
                         catch(e) {
                             console.log(e);
