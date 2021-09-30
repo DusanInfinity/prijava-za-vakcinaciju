@@ -309,6 +309,12 @@ export class Ambulanta {
                             return;
                         }
 
+                        if(vakcina.options[vakcina.selectedIndex].text === 'Izaberi')
+                        {
+                            alert('Niste izabrali vakcinu!');
+                            return;
+                        }
+
                         try
                         {
                             const vakcinaId = vakcina.options[vakcina.selectedIndex].value;
@@ -334,7 +340,11 @@ export class Ambulanta {
                 if(changeVaccApp)
                 {
                     const vakcina = document.getElementById('IzmenaVakcineList');
-
+                    if(vakcina.options[vakcina.selectedIndex].text === 'Izaberi')
+                    {
+                        alert('Niste izabrali vakcinu!');
+                        return;
+                    }
                     try
                     {
                         const vakcinaIme = vakcina.options[vakcina.selectedIndex].text;
