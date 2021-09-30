@@ -71,7 +71,11 @@ export class Ambulanta {
         this.grad.removeSideElements();
         this.grad.prikaziSideMenu();
 
-        //this.grad.prikaziSideMenu();
+        const containerDugmici = document.createElement('div');
+        containerDugmici.className = 'vertikalniDugmici';
+        this.grad.containerSideMenu.appendChild(containerDugmici);
+        this.sideElements.push(containerDugmici);
+
         const dugmici = ['Prijavi se', 'Proveri prijavu', 'Izmeni prijavu', 'Obrisi prijavu'];
         dugmici.forEach(d => {
             let el = document.createElement('button');
@@ -80,8 +84,7 @@ export class Ambulanta {
             el.onclick = (ev) => {
                 this.onButtonClick(d);
             }
-            this.grad.containerSideMenu.appendChild(el);
-            this.sideElements.push(el);
+            containerDugmici.appendChild(el);
         });
     }
 
